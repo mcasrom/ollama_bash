@@ -63,13 +63,14 @@ print_header() {
 print_status_bar() {
   local model="${CURRENT_MODEL:-Ninguno}"
   local elapsed="00:00:00"
+  local current_time=$(date +"%H:%M:%S")
   if [ -n "$START_TIME" ]; then
     local now=$(date +%s)
     local diff=$((now - START_TIME))
     elapsed=$(printf "%02d:%02d:%02d" $((diff/3600)) $((diff%3600/60)) $((diff%60)))
   fi
   echo -e "${GRAY}┌─────────────────────────────────────────────────────────┐${NC}"
-  echo -e "${GRAY}│${NC} Modelo: ${YELLOW}${model}${NC} | Dir: ${GRAY}${WORK_DIR:0:40}${NC} | ⏱ ${elapsed}${GRAY}│${NC}"
+  echo -e "${GRAY}│${NC} 🕒 ${current_time} | Modelo: ${YELLOW}${model}${NC} | ⏱ ${elapsed}${GRAY}│${NC}"
   echo -e "${GRAY}└─────────────────────────────────────────────────────────┘${NC}"
 }
 
