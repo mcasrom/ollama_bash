@@ -11,6 +11,7 @@ VERSION="1.0.0"
 START_TIME=""
 SESSION_DURATION=0
 CURRENT_MODEL=""
+LAST_RESPONSE=""
 WORK_DIR="${PWD}"
 LOG_FILE="${HOME}/.ollama_bash_history"
 WAYHAEAD_DIR="${WORK_DIR}/.wayahead"
@@ -83,6 +84,7 @@ print_menu() {
   echo -e "  ${GREEN}/download <m>${NC}  Descargar modelo"
   echo -e "  ${GREEN}/read <archivo>${NC} Leer archivo"
   echo -e "  ${GREEN}/write <archivo>${NC} Escribir archivo"
+  echo -e "  ${GREEN}/save <archivo>${NC}  Guardar última respuesta IA"
   echo -e "  ${GREEN}/wayahead${NC}      Generar WAYHAEAD del proyecto"
   echo -e "  ${GREEN}/help${NC}          Mostrar ayuda"
   echo -e "  ${GREEN}/exit${NC}          Salir"
@@ -200,7 +202,9 @@ chat_with_model() {
   echo -e "${CYAN}┌─ ${CURRENT_MODEL}${NC}"
   echo -e "${CYAN}│${NC}"
 
-  ollama run "$CURRENT_MODEL" "$prompt" 2>/dev/null
+  local response=$(ollama run "$CURRENT_MODEL" "$prompt" 2>/dev/null)
+  echo -e "$response"
+  LAST_RESPONSE="$response"
 
   echo -e "${CYAN}│${NC}"
   echo -e "${CYAN}└─ Fin respuesta${NC}"
@@ -225,6 +229,16 @@ write_file() {
   echo -e "${GRAY}(Escribe contenido, Ctrl+D para guardar)${NC}"
   cat > "$file"
   echo -e "${GREEN}✓ Archivo guardado: ${file}${NC}"
+}
+
+save_response() {
+  local file="$1"
+  if [ -z "$LAST_RESPONSE" ]; then
+    echo -e "${RED}No hay respuesta reciente para guardar.${NC}"
+    return 1
+  fi
+  echo "$LAST_RESPONSE" > "$file"
+  echo -e "${GREEN}✓ Respuesta guardada en: ${file}${NC}"
 }
 
 # --- WAYHAEAD Generator ---
@@ -365,6 +379,14 @@ main() {
           write_file "$file_path"
         else
           echo -e "${YELLOW}Uso: /write <ruta-archivo>${NC}"
+        fi
+        ;;
+      /save)
+        read -r file_path <<< "${input#* }"
+        if [ -n "$file_path" ]; then
+          save_response "$file_path"
+        else
+          echo -e "${YELLOW}Uso: /save <ruta-archivo>${NC}"
         fi
         ;;
       /wayahead)
